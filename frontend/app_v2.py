@@ -34,8 +34,14 @@ def get_aggregated_amount(po_line):
     else:
         return 0
 
+# Function to clear session state and refresh the page
+def clear_screen():
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]  # Clear all session state data
+    st.rerun()  # Rerun the app to refresh the page
+
 st.title("Service Details Dashboard")
-po_line = st.text_input("Enter PO Line:")
+po_line = st.text_input("Enter PO Line:", value="PO-001")  # Prefill PO line with "PO-001"
 
 if st.button("Fetch Data") and po_line:
     service_data = fetch_service_details(po_line)
@@ -46,24 +52,56 @@ if st.button("Fetch Data") and po_line:
         st.session_state.df = df  # Store data in session state
         if "actions" not in st.session_state:
             st.session_state.actions = {i: "pending" for i in range(len(df))}
+        if "feedback" not in st.session_state:
+            st.session_state.feedback = {}
 
 if "df" in st.session_state:
     df = st.session_state.df
     st.subheader("Service Details")
-    
+
     updated_data = []
     for i, row in df.iterrows():
-        cols = st.columns(len(row) + 2)  # Create columns for each field + action buttons
-        for j, value in enumerate(row):
-            cols[j].write(value)  # Display data
+        st.write(f"**Row {i + 1}:**")
         
-        with cols[-2]:
-            if st.button(f"Accept {i}", key=f"accept_{i}"):
+        # Flip the table to long format: each column value will be shown vertically
+        flipped_row = row.to_frame().reset_index()
+        flipped_row.columns = ["Field", "Value"]
+        
+
+        # Convert all values in the "Value" column to string
+        flipped_row["Value"] = flipped_row["Value"].apply(str)
+
+        # Display the flipped row as a table
+        st.table(flipped_row)
+        
+        # Create columns for the action buttons beside the row
+        col1, col2 = st.columns([1, 1])  # Two columns: one for "Accept" and one for "Reject"
+        
+        # Get feedback for the row, if any
+        feedback_accept = st.session_state.feedback.get(i, {}).get("accept", "")
+        feedback_reject = st.session_state.feedback.get(i, {}).get("reject", "")
+        
+        with col1:
+            if st.button(f"Accept Row {i}", key=f"accept_{i}", help="Click to accept the row"):
                 st.session_state.actions[i] = "accept"
-        with cols[-1]:
-            if st.button(f"Reject {i}", key=f"reject_{i}"):
+                st.session_state.feedback[i] = {"accept": f"Row {i + 1} accepted"}
+                # Immediately show feedback for this row
+                st.success(f"Row {i + 1} accepted")
+
+        with col2:
+            if st.button(f"Reject Row {i}", key=f"reject_{i}", help="Click to reject the row"):
                 st.session_state.actions[i] = "reject"
+                st.session_state.feedback[i] = {"reject": f"Row {i + 1} rejected"}
+                # Immediately show feedback for this row
+                st.error(f"Row {i + 1} rejected")
+
         
+        # Show feedback below each row
+        if feedback_accept:
+            st.success(feedback_accept)
+        if feedback_reject:
+            st.error(feedback_reject)
+
         updated_data.append(row)
     
     if st.button("Submit Actions"):
@@ -77,7 +115,12 @@ if "df" in st.session_state:
         update_status(po_line, updates)
         total_amount = get_aggregated_amount(po_line)
         st.write(f"Total Calculated Amount: {total_amount}")
-    
+
 if "df" in st.session_state and "job_rates" in st.session_state:
     st.subheader("Job Rates")
+    # Display the job rates as a cleaner dataframe
     st.dataframe(pd.DataFrame(st.session_state.job_rates))
+
+# Clear button to reset everything
+if st.button("Clear Screen"):
+    clear_screen()  # Clear session state and refresh the page
