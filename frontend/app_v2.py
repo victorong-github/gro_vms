@@ -82,18 +82,18 @@ if "df" in st.session_state:
         feedback_reject = st.session_state.feedback.get(i, {}).get("reject", "")
         
         with col1:
-            if st.button(f"Accept Row {i}", key=f"accept_{i}", help="Click to accept the row"):
+            if st.button(f"Accept", key=f"accept_{i}", help="Click to accept the row"):
                 st.session_state.actions[i] = "accept"
-                st.session_state.feedback[i] = {"accept": f"Row {i + 1} accepted"}
+                st.session_state.feedback[i] = {"accept": f"Accepted"}
                 # Immediately show feedback for this row
-                st.success(f"Row {i + 1} accepted")
+                st.success(f"Accepted")
 
         with col2:
-            if st.button(f"Reject Row {i}", key=f"reject_{i}", help="Click to reject the row"):
+            if st.button(f"Reject", key=f"reject_{i}", help="Click to reject the row"):
                 st.session_state.actions[i] = "reject"
-                st.session_state.feedback[i] = {"reject": f"Row {i + 1} rejected"}
+                st.session_state.feedback[i] = {"reject": f"Rejected"}
                 # Immediately show feedback for this row
-                st.error(f"Row {i + 1} rejected")
+                st.error(f"Rejected")
 
         
         # Show feedback below each row
