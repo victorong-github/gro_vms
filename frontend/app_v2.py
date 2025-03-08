@@ -27,23 +27,87 @@ st.markdown(footer_html, unsafe_allow_html=True)
 
 st.markdown("""
     <style>
-        .reportview-container {
-            background-color: #f4f4f9;
+        /* Light Theme Styles */
+        .streamlit-light .reportview-container {
+            background-color: #f8f9fa;
             padding: 20px;
         }
-        .stButton>button {
-            background-color: #007BFF;
+        .streamlit-light .stButton>button {
+            background-color: #4CAF50;
             color: white;
-            font-size: 16px;
+            font-size: 18px;
             border-radius: 10px;
-            padding: 12px 20px;
+            padding: 10px 20px;
         }
-        .stTextInput input {
+        .streamlit-light .stTextInput input {
             border-radius: 10px;
             padding: 10px;
         }
-        .stCheckbox>div {
+
+        /* Dark Theme Styles */
+        .streamlit-dark .reportview-container {
+            background-color: #1f1f1f;
+            padding: 20px;
+        }
+        .streamlit-dark .stButton>button {
+            background-color: #333333;
+            color: white;
             font-size: 18px;
+            border-radius: 10px;
+            padding: 10px 20px;
+        }
+        .streamlit-dark .stTextInput input {
+            border-radius: 10px;
+            padding: 10px;
+            background-color: #444444;
+            color: white;
+        }
+
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+    <style>
+        /* Light Theme Styles */
+        .streamlit-light .stTable th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .streamlit-light .stTable tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+        .streamlit-light .stTable tr:nth-child(even) {
+            background-color: #ffffff;
+        }
+        .streamlit-light .stTable tr:hover {
+            background-color: #ddd;
+        }
+
+        /* Dark Theme Styles */
+        .streamlit-dark .stTable th {
+            background-color: #1f1f1f;
+            color: white;
+        }
+        .streamlit-dark .stTable tr:nth-child(odd) {
+            background-color: #333333;
+        }
+        .streamlit-dark .stTable tr:nth-child(even) {
+            background-color: #262626;
+        }
+        .streamlit-dark .stTable tr:hover {
+            background-color: #444444;
+        }
+
+        /* Table general styling */
+        .stTable {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 14px;
+            text-align: left;
+        }
+        .stTable th, .stTable td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
         }
     </style>
 """, unsafe_allow_html=True)
