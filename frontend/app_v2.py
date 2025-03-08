@@ -3,6 +3,27 @@ import requests
 import pandas as pd
 
 #st.set_page_config(layout="wide")
+footer_html = """
+ <footer>
+   <div style="background-color: #2d3748; padding: 40px 16px; color: white; text-align: center;">
+     <p style="font-size: 24px; font-weight: bold;">Streamlining Timesheet</p>
+     <div>
+       <p style="font-size: 18px;">Built as part of the GovTech {build} Hackathon</p>
+     </div>
+     <div style="font-size: 14px; margin-top: 10px;">
+       <a href="https://www.tech.gov.sg/contact-us/" style="color: white; margin-right: 10px;">Contact Us</a>
+       <a href="https://www.tech.gov.sg/report-vulnerability/" style="color: white; margin-right: 10px;">Report Vulnerability</a>
+       <a href="https://www.tech.gov.sg/privacy/" style="color: white; margin-right: 10px;">Privacy Statement</a>
+       <a href="https://www.tech.gov.sg/terms-of-use/" style="color: white;">Terms of Use</a>
+     </div>
+     <hr style="border-color: #cbd5e0; margin: 20px 0;">
+     <p style="font-size: 14px;">© 2024 Government Technology Agency of Singapore | GovTech</p>
+   </div>
+ </footer>
+ """
+ 
+# Display footer in Streamlit
+st.markdown(footer_html, unsafe_allow_html=True)
 
 st.markdown("""
     <style>
