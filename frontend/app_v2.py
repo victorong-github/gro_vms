@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import pandas as pd
+from datetime import datetime
 
 #st.set_page_config(layout="wide")
 footer_html = """
@@ -186,6 +187,8 @@ else:
 
 if "df" in st.session_state:
     df = st.session_state.df
+    df["service_month"] = pd.to_datetime(df["service_month"], format="%m-%Y")
+    df["service_month"] = df["service_month"].apply(lambda x: pd.to_datetime(x, format="%m-%Y").strftime("%b %Y"))
 
     updated_data = []
     for i, row in df.iterrows():
@@ -193,6 +196,17 @@ if "df" in st.session_state:
         flipped_row.columns = ["Field", "Value"]
         flipped_row["Value"] = flipped_row["Value"].apply(str)
         
+        # Extract name and month from flipped_row
+        name = flipped_row.loc[flipped_row["Field"] == "name", "Value"].values[0]
+        month = flipped_row.loc[flipped_row["Field"] == "service_month", "Value"].values[0]
+
+        st.markdown(
+            f"""
+            <h3 style="color: #1f77b4;">Generating timesheet and cost summary for {name} for {month}</h3>
+            """,
+        unsafe_allow_html=True
+        )
+
         # Create a dictionary for renaming fields
         field_mapping = {
             "po_line": "PO Line",
