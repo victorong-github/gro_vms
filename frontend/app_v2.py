@@ -245,16 +245,16 @@ if "df" in st.session_state:
         categories = list(grouped_fields.keys())
         col1, col2 = st.columns(2)
 
-        for i in range(0, len(categories), 2):
+        for j in range(0, len(categories), 2):
             with col1:
-                st.subheader(categories[i])
+                st.subheader(categories[j])
                 df1 = flipped_row[flipped_row["Field"].isin(grouped_fields[categories[i]])]
                 st.table(df1.set_index("Field"))
 
-            if i + 1 < len(categories):  # Ensure we don't go out of bounds
+            if j + 1 < len(categories):  # Ensure we don't go out of bounds
                 with col2:
-                    st.subheader(categories[i + 1])
-                    df2 = flipped_row[flipped_row["Field"].isin(grouped_fields[categories[i + 1]])]
+                    st.subheader(categories[j + 1])
+                    df2 = flipped_row[flipped_row["Field"].isin(grouped_fields[categories[j + 1]])]
                     st.table(df2.set_index("Field"))
             
 
