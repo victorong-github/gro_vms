@@ -264,18 +264,71 @@ if "df" in st.session_state:
         
         feedback_accept = st.session_state.feedback.get(i, {}).get("accept", "")
         feedback_reject = st.session_state.feedback.get(i, {}).get("reject", "")
-        
+                
+        # Custom button styling
+        approve_button = f"""
+            <style>
+                .approve {{
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 10px 24px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                }}
+                .approve:hover {{
+                    background-color: #45a049;
+                }}
+            </style>
+            <button class="approve" onclick="window.location.reload()">Approve Timesheet & Amount</button>
+        """
+
+        reject_button = f"""
+            <style>
+                .reject {{
+                    background-color: #FF4B4B;
+                    color: white;
+                    padding: 10px 24px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                }}
+                .reject:hover {{
+                    background-color: #E04343;
+                }}
+            </style>
+            <button class="reject" onclick="window.location.reload()">Reject Timesheet & Amount</button>
+        """
+
+        # Initialize the session state for the first run
+        if f"clicked_{i}" not in st.session_state:
+            st.session_state[f"clicked_{i}"] = None
+
+        # Default message
+        message = "Please Click Accept or Reject"
+
+        # Button click handling
         with col1:
-            if st.button(f"Approve Timesheet & Amount", key=f"accept_{i}"):
+            if st.button("✅ Approve Timesheet & Amount", key=f"accept_{i}"):
                 st.session_state.actions[i] = "Approved"
-         #       st.session_state.feedback[i] = {"accept": "Approved"}
-                st.success("Accepted")
+                st.session_state[f"clicked_{i}"] = "Approved"  # Set state when button is clicked
+                message = "Accepted"  # Set message to Accepted
 
         with col2:
-            if st.button(f"Reject Timesheet & Amount", key=f"reject_{i}"):
+            if st.button("❌ Reject Timesheet & Amount", key=f"reject_{i}"):
                 st.session_state.actions[i] = "Rejected"
-         #       st.session_state.feedback[i] = {"reject": "Rejected"}
-                st.error("Rejected")
+                st.session_state[f"clicked_{i}"] = "Rejected"  # Set state when button is clicked
+                message = "Rejected"  # Set message to Rejected
+
+        # Show the current message
+        if message == "Accepted":
+            st.success(message)
+        elif message == "Rejected":
+            st.error(message)
+        else:
+            st.info(message)  # Default message if neither button is clicked
 
         if feedback_accept:
             st.success(feedback_accept)
