@@ -166,20 +166,23 @@ if manual_entry:
                 st.session_state.feedback = {}
 
 else:
-    cols = st.columns(4)
     po_lines = ["PO-001", "PO-002", "PO-003", "PO-004"]
-    for i, line in enumerate(po_lines):
-        if cols[i].button(line):
-            po_line = line
-            service_data = fetch_service_details(po_line)
-            job_rates = fetch_job_rates()
-            if service_data:
-                df = pd.DataFrame(service_data)
-                st.session_state.df = df
-                if "actions" not in st.session_state:
-                    st.session_state.actions = {i: "pending" for i in range(len(df))}
-                if "feedback" not in st.session_state:
-                    st.session_state.feedback = {}
+
+    # Dropdown for selecting PO line
+    po_line = st.selectbox("Select PO Line", po_lines, index=0)
+
+    # Fetch service details and job rates when a PO line is selected
+    if po_line:
+        service_data = fetch_service_details(po_line)
+        job_rates = fetch_job_rates()
+        if service_data:
+            df = pd.DataFrame(service_data)
+            st.session_state.df = df
+            if "actions" not in st.session_state:
+                st.session_state.actions = {i: "pending" for i in range(len(df))}
+            if "feedback" not in st.session_state:
+                st.session_state.feedback = {}
+
 
 
 # if st.button("Fetch Data") and po_line:
