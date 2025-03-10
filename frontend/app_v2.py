@@ -360,8 +360,6 @@ if "df" in st.session_state:
             df.at[i, "calculated_amount"] = new_amount
         
         update_gro_approval(po_line, updates)
-        total_amount = get_aggregated_amount(po_line)
-        st.write(f"Total Calculated Amount: {total_amount}")
 
 if "df" in st.session_state and "job_rates" in st.session_state:
     st.subheader("Job Rates")
