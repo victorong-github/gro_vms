@@ -225,7 +225,7 @@ if "df" in st.session_state:
             "Basic Info": ["PO Line", "Company Name", "Job Role"],
             "Service Details": ["Service Month", "Service Start Date", "Service End Date"],
             "Billing": ["Billable Days", "Non-Billable Days", "Rate","Calculated Amount"],
-            "Approvals": ["RO Approval", "GRO Approval"]
+            "Approvals": ["Employee Name", "RO Approval", "GRO Approval"]
         }
 
         # Custom CSS to standardize column width
@@ -248,7 +248,7 @@ if "df" in st.session_state:
         for j in range(0, len(categories), 2):
             with col1:
                 st.subheader(categories[j])
-                df1 = flipped_row[flipped_row["Field"].isin(grouped_fields[categories[i]])]
+                df1 = flipped_row[flipped_row["Field"].isin(grouped_fields[categories[j]])]
                 st.table(df1.set_index("Field"))
 
             if j + 1 < len(categories):  # Ensure we don't go out of bounds
