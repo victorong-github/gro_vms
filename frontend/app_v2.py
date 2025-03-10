@@ -235,8 +235,44 @@ if "df" in st.session_state:
         # Convert values to string
         flipped_row["Value"] = flipped_row["Value"].apply(str)
 
+        grouped_fields = {
+            "Basic Info": ["PO Line", "Company Name", "Job Role"],
+            "Service Details": ["Service Month", "Service Start Date", "Service End Date"],
+            "Billing": ["Billable Days", "Non-Billable Days", "Calculated Amount"],
+            "Approvals": ["RO Approval", "GRO Approval"]
+        }
+
+        # Custom CSS to standardize column width
+        st.markdown("""
+            <style>
+            div[data-testid="stTable"] table {
+                width: 100% !important;
+            }
+            div[data-testid="stTable"] table th {
+                text-align: left !important;
+                width: 50% !important;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
+        # Display tables in a 2x2 grid
+        categories = list(grouped_fields.keys())
+        col1, col2 = st.columns(2)
+
+        for i in range(0, len(categories), 2):
+            with col1:
+                st.subheader(categories[i])
+                df1 = flipped_row[flipped_row["Field"].isin(grouped_fields[categories[i]])]
+                st.table(df1.set_index("Field"))
+
+            if i + 1 < len(categories):  # Ensure we don't go out of bounds
+                with col2:
+                    st.subheader(categories[i + 1])
+                    df2 = flipped_row[flipped_row["Field"].isin(grouped_fields[categories[i + 1]])]
+                    st.table(df2.set_index("Field"))
+            
         # Display the table
-        st.table(flipped_row)
+        #st.table(flipped_row)
 
         
         col1, col2 = st.columns([1, 1])
