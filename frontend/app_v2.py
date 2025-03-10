@@ -199,7 +199,6 @@ else:
 
 if "df" in st.session_state:
     df = st.session_state.df
-    st.subheader("Service Details")
 
     updated_data = []
     for i, row in df.iterrows():
