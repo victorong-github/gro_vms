@@ -184,19 +184,6 @@ else:
                 st.session_state.feedback = {}
 
 
-
-# if st.button("Fetch Data") and po_line:
-#     service_data = fetch_service_details(po_line)
-#     job_rates = fetch_job_rates()
-    
-#     if service_data:
-#         df = pd.DataFrame(service_data)
-#         st.session_state.df = df
-#         if "actions" not in st.session_state:
-#             st.session_state.actions = {i: "pending" for i in range(len(df))}
-#         if "feedback" not in st.session_state:
-#             st.session_state.feedback = {}
-
 if "df" in st.session_state:
     df = st.session_state.df
 
@@ -237,7 +224,7 @@ if "df" in st.session_state:
         grouped_fields = {
             "Basic Info": ["PO Line", "Company Name", "Job Role"],
             "Service Details": ["Service Month", "Service Start Date", "Service End Date"],
-            "Billing": ["Billable Days", "Non-Billable Days", "Calculated Amount"],
+            "Billing": ["Billable Days", "Non-Billable Days", "Rate","Calculated Amount"],
             "Approvals": ["RO Approval", "GRO Approval"]
         }
 
@@ -270,8 +257,7 @@ if "df" in st.session_state:
                     df2 = flipped_row[flipped_row["Field"].isin(grouped_fields[categories[i + 1]])]
                     st.table(df2.set_index("Field"))
             
-        # Display the table
-        #st.table(flipped_row)
+
 
         
         col1, col2 = st.columns([1, 1])
