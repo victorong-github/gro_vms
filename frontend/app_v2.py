@@ -172,6 +172,15 @@ else:
     # Dropdown for selecting PO line
     po_line = st.selectbox("Select PO Line", po_lines, index=0)
 
+    # Reset the DataFrame in session state if the PO line changes
+    if 'previous_po_line' not in st.session_state:
+        st.session_state.previous_po_line = po_line  # Initialize the first PO line
+
+    if po_line != st.session_state.previous_po_line:
+        # Clear the DataFrame when the PO line is changed
+        st.session_state.df = pd.DataFrame()
+        st.session_state.previous_po_line = po_line  # Update the previous PO line
+
     # Fetch service details and job rates when a PO line is selected
     if po_line:
         service_data = fetch_service_details(po_line)
@@ -183,9 +192,9 @@ else:
                 st.session_state.actions = {i: "pending" for i in range(len(df))}
             if "feedback" not in st.session_state:
                 st.session_state.feedback = {}
+    
 
-
-if "df" in st.session_state:
+if "df" in st.session_state and not st.session_state.df.empty:
     df = st.session_state.df
     df["service_month"] = pd.to_datetime(df["service_month"], format="%m-%Y")
     df["service_month"] = df["service_month"].apply(lambda x: pd.to_datetime(x, format="%m-%Y").strftime("%b %Y"))
@@ -202,7 +211,7 @@ if "df" in st.session_state:
 
         st.markdown(
             f"""
-            <h3 style="color: #1f77b4;">Generating timesheet and cost summary for {name} for {month}</h3>
+            <h3 style="color: #1f77b4;">Timesheet and Cost Summary for {name} for {month}</h3>
             """,
         unsafe_allow_html=True
         )
@@ -360,6 +369,8 @@ if "df" in st.session_state:
             df.at[i, "calculated_amount"] = new_amount
         
         update_gro_approval(po_line, updates)
+else:
+    st.warning("Either all PO lines are approved or there are no PO lines available.")
 
 if "df" in st.session_state and "job_rates" in st.session_state:
     st.subheader("Job Rates")
