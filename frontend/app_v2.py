@@ -209,6 +209,13 @@ if "df" in st.session_state and not st.session_state.df.empty:
         name = flipped_row.loc[flipped_row["Field"] == "name", "Value"].values[0]
         month = flipped_row.loc[flipped_row["Field"] == "service_month", "Value"].values[0]
 
+        # Check if the gro_approval is "Approved"
+        gro_approval = flipped_row.loc[flipped_row["Field"] == "gro_approval", "Value"].values[0]
+        
+        # Skip the rendering if "gro_approval" is "Approved"
+        if gro_approval == "Approved":
+            continue
+
         st.markdown(
             f"""
             <h3 style="color: #1f77b4;">Timesheet and Cost Summary for {name} for {month}</h3>
