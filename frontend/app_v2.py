@@ -166,6 +166,8 @@ if manual_entry:
                 st.session_state.actions = {i: "Pending" for i in range(len(df))}
             if "feedback" not in st.session_state:
                 st.session_state.feedback = {}
+        else:
+            st.error(f"No service details found for PO Line: {po_line}")
 
 else:
     po_lines = ["PO-001", "PO-002", "PO-003", "PO-004"]
