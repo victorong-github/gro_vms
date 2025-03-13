@@ -149,12 +149,13 @@ st.title("GRO Approval Interface")
 
 # Toggle between selection buttons and manual entry
 manual_entry = st.checkbox("Manual Entry")
+#manual_entry = 0
 po_line = "PO-001"  # Default value
 
 if manual_entry:
     po_line = st.text_input("Enter PO Line:", value=po_line)
     
-    if st.button("Fetch Data") and po_line:
+    if po_line:
         service_data = fetch_service_details(po_line)
         job_rates = fetch_job_rates()
 
@@ -162,7 +163,7 @@ if manual_entry:
             df = pd.DataFrame(service_data)
             st.session_state.df = df
             if "actions" not in st.session_state:
-                st.session_state.actions = {i: "pending" for i in range(len(df))}
+                st.session_state.actions = {i: "Pending" for i in range(len(df))}
             if "feedback" not in st.session_state:
                 st.session_state.feedback = {}
 
@@ -189,14 +190,14 @@ else:
             df = pd.DataFrame(service_data)
             st.session_state.df = df
             if "actions" not in st.session_state:
-                st.session_state.actions = {i: "pending" for i in range(len(df))}
+                st.session_state.actions = {i: "Pending" for i in range(len(df))}
             if "feedback" not in st.session_state:
                 st.session_state.feedback = {}
     
 
 if "df" in st.session_state and not st.session_state.df.empty:
     df = st.session_state.df
-    df["service_month"] = pd.to_datetime(df["service_month"], format="%m-%Y")
+    #df["service_month"] = pd.to_datetime(df["service_month"], format="%m-%Y")
     df["service_month"] = df["service_month"].apply(lambda x: pd.to_datetime(x, format="%m-%Y").strftime("%b %Y"))
 
     updated_data = []
@@ -213,167 +214,166 @@ if "df" in st.session_state and not st.session_state.df.empty:
         gro_approval = flipped_row.loc[flipped_row["Field"] == "gro_approval", "Value"].values[0]
         
         # Skip the rendering if "gro_approval" is "Approved"
-        if gro_approval == "Approved":
-            continue
+        if gro_approval == "Pending":
 
-        st.markdown(
-            f"""
-            <h3 style="color: #1f77b4;">Timesheet and Cost Summary for {name} for {month}</h3>
-            """,
-        unsafe_allow_html=True
-        )
+            st.markdown(
+                f"""
+                <h3 style="color: #1f77b4;">Timesheet and Cost Summary for {name} for {month}</h3>
+                """,
+            unsafe_allow_html=True
+            )
 
-        # Create a dictionary for renaming fields
-        field_mapping = {
-            "po_line": "PO Line",
-            "company": "Company Name",
-            "job_role": "Job Role",
-            "service_month": "Service Month",
-            "billable_days": "Billable Days",
-            "non_billable_days": "Non-Billable Days",
-            "service_start_date": "Service Start Date",
-            "service_end_date": "Service End Date",
-            "calculated_amount": "Calculated Amount (excluding GST)",
-            "name": "Employee Name",
-            "ro_approval": "RO Approval",
-            "gro_approval": "GRO Approval",
-            "rates_id": "Rate ID",
-            "rate": "Rate",
-            "yyyy": "Year"
-        }
-
-        # Rename the 'Field' column values using the mapping
-        flipped_row["Field"] = flipped_row["Field"].map(field_mapping).fillna(flipped_row["Field"])
-
-        # Remove 'rates_id' and 'yyyy' from the DataFrame
-        flipped_row = flipped_row[~flipped_row["Field"].isin(["Rate ID", "Year"])]
-
-        # Convert values to string
-        flipped_row["Value"] = flipped_row["Value"].apply(str)
-
-        grouped_fields = {
-            "Basic Info": ["PO Line", "Company Name", "Job Role"],
-            "Service Details": ["Service Month", "Service Start Date", "Service End Date"],
-            "Billing": ["Billable Days", "Non-Billable Days", "Rate","Calculated Amount (excluding GST)"],
-            "Approvals": ["Employee Name", "RO Approval", "GRO Approval"]
-        }
-
-        # Custom CSS to standardize column width
-        st.markdown("""
-            <style>
-            div[data-testid="stTable"] table {
-                width: 100% !important;
+            # Create a dictionary for renaming fields
+            field_mapping = {
+                "po_line": "PO Line",
+                "company": "Company Name",
+                "job_role": "Job Role",
+                "service_month": "Service Month",
+                "billable_days": "Billable Days",
+                "non_billable_days": "Non-Billable Days",
+                "service_start_date": "Service Start Date",
+                "service_end_date": "Service End Date",
+                "calculated_amount": "Calculated Amount (excluding GST)",
+                "name": "Employee Name",
+                "ro_approval": "RO Approval",
+                "gro_approval": "GRO Approval",
+                "rates_id": "Rate ID",
+                "rate": "Rate",
+                "yyyy": "Year"
             }
-            div[data-testid="stTable"] table th {
-                text-align: left !important;
-                width: 50% !important;
+
+            # Rename the 'Field' column values using the mapping
+            flipped_row["Field"] = flipped_row["Field"].map(field_mapping).fillna(flipped_row["Field"])
+
+            # Remove 'rates_id' and 'yyyy' from the DataFrame
+            flipped_row = flipped_row[~flipped_row["Field"].isin(["Rate ID", "Year"])]
+
+            # Convert values to string
+            flipped_row["Value"] = flipped_row["Value"].apply(str)
+
+            grouped_fields = {
+                "Basic Info": ["PO Line", "Company Name", "Job Role"],
+                "Service Details": ["Service Month", "Service Start Date", "Service End Date"],
+                "Billing": ["Billable Days", "Non-Billable Days", "Rate","Calculated Amount (excluding GST)"],
+                "Approvals": ["Employee Name", "RO Approval", "GRO Approval"]
             }
-            </style>
-        """, unsafe_allow_html=True)
 
-        # Display tables in a 2x2 grid
-        categories = list(grouped_fields.keys())
-        col1, col2 = st.columns(2)
+            # Custom CSS to standardize column width
+            st.markdown("""
+                <style>
+                div[data-testid="stTable"] table {
+                    width: 100% !important;
+                }
+                div[data-testid="stTable"] table th {
+                    text-align: left !important;
+                    width: 50% !important;
+                }
+                </style>
+            """, unsafe_allow_html=True)
 
-        for j in range(0, len(categories), 2):
-            with col1:
-                st.subheader(categories[j])
-                df1 = flipped_row[flipped_row["Field"].isin(grouped_fields[categories[j]])]
-                st.table(df1.set_index("Field"))
+            # Display tables in a 2x2 grid
+            categories = list(grouped_fields.keys())
+            col1, col2 = st.columns(2)
 
-            if j + 1 < len(categories):  # Ensure we don't go out of bounds
-                with col2:
-                    st.subheader(categories[j + 1])
-                    df2 = flipped_row[flipped_row["Field"].isin(grouped_fields[categories[j + 1]])]
-                    st.table(df2.set_index("Field"))
-            
+            for j in range(0, len(categories), 2):
+                with col1:
+                    st.subheader(categories[j])
+                    df1 = flipped_row[flipped_row["Field"].isin(grouped_fields[categories[j]])]
+                    st.table(df1.set_index("Field"))
 
-
-        
-        col1, col2 = st.columns([1, 1])
-        
-        feedback_accept = st.session_state.feedback.get(i, {}).get("accept", "")
-        feedback_reject = st.session_state.feedback.get(i, {}).get("reject", "")
+                if j + 1 < len(categories):  # Ensure we don't go out of bounds
+                    with col2:
+                        st.subheader(categories[j + 1])
+                        df2 = flipped_row[flipped_row["Field"].isin(grouped_fields[categories[j + 1]])]
+                        st.table(df2.set_index("Field"))
                 
-        # Custom button styling
-        approve_button = f"""
-            <style>
-                .approve {{
-                    background-color: #4CAF50;
-                    color: white;
-                    padding: 10px 24px;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    font-size: 16px;
-                }}
-                .approve:hover {{
-                    background-color: #45a049;
-                }}
-            </style>
-            <button class="approve" onclick="window.location.reload()">Approve Timesheet & Amount</button>
-        """
 
-        reject_button = f"""
-            <style>
-                .reject {{
-                    background-color: #FF4B4B;
-                    color: white;
-                    padding: 10px 24px;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    font-size: 16px;
-                }}
-                .reject:hover {{
-                    background-color: #E04343;
-                }}
-            </style>
-            <button class="reject" onclick="window.location.reload()">Reject Timesheet & Amount</button>
-        """
 
-        # Initialize the session state for the first run
-        if f"clicked_{i}" not in st.session_state:
-            st.session_state[f"clicked_{i}"] = None
+            
+            col1, col2 = st.columns([1, 1])
+            
+            feedback_accept = st.session_state.feedback.get(i, {}).get("accept", "")
+            feedback_reject = st.session_state.feedback.get(i, {}).get("reject", "")
+                    
+            # Custom button styling
+            approve_button = f"""
+                <style>
+                    .approve {{
+                        background-color: #4CAF50;
+                        color: white;
+                        padding: 10px 24px;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 16px;
+                    }}
+                    .approve:hover {{
+                        background-color: #45a049;
+                    }}
+                </style>
+                <button class="approve" onclick="window.location.reload()">Approve Timesheet & Amount</button>
+            """
 
-        # Default message
-        message = "Please Click Accept or Reject"
+            reject_button = f"""
+                <style>
+                    .reject {{
+                        background-color: #FF4B4B;
+                        color: white;
+                        padding: 10px 24px;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 16px;
+                    }}
+                    .reject:hover {{
+                        background-color: #E04343;
+                    }}
+                </style>
+                <button class="reject" onclick="window.location.reload()">Reject Timesheet & Amount</button>
+            """
 
-        # Button click handling
-        with col1:
-            if st.button("✅ Approve Timesheet & Amount", key=f"accept_{i}"):
-                st.session_state.actions[i] = "Approved"
-                st.session_state[f"clicked_{i}"] = "Approved"  # Set state when button is clicked
-                message = "Accepted"  # Set message to Accepted
+            # Initialize the session state for the first run
+            if f"clicked_{i}" not in st.session_state:
+                st.session_state[f"clicked_{i}"] = None
 
-        with col2:
-            if st.button("❌ Reject Timesheet & Amount", key=f"reject_{i}"):
-                st.session_state.actions[i] = "Rejected"
-                st.session_state[f"clicked_{i}"] = "Rejected"  # Set state when button is clicked
-                message = "Rejected"  # Set message to Rejected
+            # Default message
+            message = "Please Click Accept or Reject"
 
-        # Show the current message
-        if message == "Accepted":
-            st.success(message)
-        elif message == "Rejected":
-            st.error(message)
-        else:
-            st.info(message)  # Default message if neither button is clicked
+            # Button click handling
+            with col1:
+                if st.button("✅ Approve Timesheet & Amount", key=f"accept_{i}"):
+                    st.session_state.actions[i] = "Approved"
+                    st.session_state[f"clicked_{i}"] = "Approved"  # Set state when button is clicked
+                    message = "Accepted"  # Set message to Accepted
 
-        if feedback_accept:
-            st.success(feedback_accept)
-        if feedback_reject:
-            st.error(feedback_reject)
+            with col2:
+                if st.button("❌ Reject Timesheet & Amount", key=f"reject_{i}"):
+                    st.session_state.actions[i] = "Rejected"
+                    st.session_state[f"clicked_{i}"] = "Rejected"  # Set state when button is clicked
+                    message = "Rejected"  # Set message to Rejected
 
-        updated_data.append(row)
-    
+            # Show the current message
+            if message == "Accepted":
+                st.success(message)
+            elif message == "Rejected":
+                st.error(message)
+            else:
+                st.info(message)  # Default message if neither button is clicked
+
+            if feedback_accept:
+                st.success(feedback_accept)
+            if feedback_reject:
+                st.error(feedback_reject)
+
+            updated_data.append(row)
+        
     if st.button("Submit Actions"):
         updates = []
         for i, row in df.iterrows():
-            new_status = st.session_state.actions.get(i, "pending")
+            new_status = st.session_state.actions.get(i, "Approved")
             new_amount = row["calculated_amount"] if new_status == "accept" else 0
             updates.append({"gro_approval": new_status})
-            df.at[i, "calculated_amount"] = new_amount
+            #df.at[i, "calculated_amount"] = new_amount
         
         update_gro_approval(po_line, updates)
 else:
