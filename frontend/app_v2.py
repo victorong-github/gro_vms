@@ -233,7 +233,7 @@ if "df" in st.session_state and not st.session_state.df.empty:
             "non_billable_days": "Non-Billable Days",
             "service_start_date": "Service Start Date",
             "service_end_date": "Service End Date",
-            "calculated_amount": "Calculated Amount",
+            "calculated_amount": "Calculated Amount (excluding GST)",
             "name": "Employee Name",
             "ro_approval": "RO Approval",
             "gro_approval": "GRO Approval",
@@ -254,7 +254,7 @@ if "df" in st.session_state and not st.session_state.df.empty:
         grouped_fields = {
             "Basic Info": ["PO Line", "Company Name", "Job Role"],
             "Service Details": ["Service Month", "Service Start Date", "Service End Date"],
-            "Billing": ["Billable Days", "Non-Billable Days", "Rate","Calculated Amount"],
+            "Billing": ["Billable Days", "Non-Billable Days", "Rate","Calculated Amount (excluding GST)"],
             "Approvals": ["Employee Name", "RO Approval", "GRO Approval"]
         }
 
