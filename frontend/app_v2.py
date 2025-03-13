@@ -155,19 +155,29 @@ po_line = "PO-001"  # Default value
 if manual_entry:
     po_line = st.text_input("Enter PO Line:", value=po_line)
     
+    # Reset the DataFrame in session state if the PO line changes
+    if 'previous_po_line' not in st.session_state:
+        st.session_state.previous_po_line = po_line  # Initialize the first PO line
+
+    if po_line != st.session_state.previous_po_line:
+        # Clear the DataFrame when the PO line is changed
+        st.session_state.df = pd.DataFrame()
+        st.session_state.previous_po_line = po_line  # Update the previous PO line
+
     if po_line:
         service_data = fetch_service_details(po_line)
         job_rates = fetch_job_rates()
 
         if service_data:
-            df = pd.DataFrame(service_data)
-            st.session_state.df = df
-            if "actions" not in st.session_state:
-                st.session_state.actions = {i: "Pending" for i in range(len(df))}
-            if "feedback" not in st.session_state:
-                st.session_state.feedback = {}
-        else:
-            st.error(f"No service details found for PO Line: {po_line}")
+            try:
+                df = pd.DataFrame(service_data)
+                st.session_state.df = df
+                if "actions" not in st.session_state:
+                    st.session_state.actions = {i: "Pending" for i in range(len(df))}
+                if "feedback" not in st.session_state:
+                    st.session_state.feedback = {}
+            except ValueError as e:
+                st.error(f"No service details found for PO Line: {po_line}")
 
 else:
     po_lines = ["PO-001", "PO-002", "PO-003", "PO-004"]
@@ -200,7 +210,10 @@ else:
 if "df" in st.session_state and not st.session_state.df.empty:
     df = st.session_state.df
     #df["service_month"] = pd.to_datetime(df["service_month"], format="%m-%Y")
-    df["service_month"] = df["service_month"].apply(lambda x: pd.to_datetime(x, format="%m-%Y").strftime("%b %Y"))
+    try:
+        df["service_month"] = df["service_month"].apply(lambda x: pd.to_datetime(x, format="%m-%Y").strftime("%b %Y"))
+    except ValueError as e:
+        st.error(f"No service details found for PO Line: {po_line}")
 
     updated_data = []
     for i, row in df.iterrows():
@@ -215,7 +228,7 @@ if "df" in st.session_state and not st.session_state.df.empty:
         # Check if the gro_approval is "Approved"
         gro_approval = flipped_row.loc[flipped_row["Field"] == "gro_approval", "Value"].values[0]
         
-        # Skip the rendering if "gro_approval" is "Approved"
+        # Skip the rendering if "gro_approval" is "Approved" or "Rejected"
         if gro_approval == "Pending":
 
             st.markdown(
@@ -368,13 +381,39 @@ if "df" in st.session_state and not st.session_state.df.empty:
                 st.error(feedback_reject)
 
             updated_data.append(row)
-        
+
     if st.button("Submit Actions"):
         updates = []
         for i, row in df.iterrows():
-            new_status = st.session_state.actions.get(i, "Approved")
-            new_amount = row["calculated_amount"] if new_status == "accept" else 0
-            updates.append({"gro_approval": new_status})
+            flipped_row = row.to_frame().reset_index()
+            flipped_row.columns = ["Field", "Value"]
+            flipped_row["Value"] = flipped_row["Value"].apply(str)
+            
+            # Extract name and month from flipped_row
+            name = flipped_row.loc[flipped_row["Field"] == "name", "Value"].values[0]
+            month = flipped_row.loc[flipped_row["Field"] == "service_month", "Value"].values[0]
+
+            # Check if the gro_approval is "Approved"
+            gro_approval = flipped_row.loc[flipped_row["Field"] == "gro_approval", "Value"].values[0]
+
+            # Ensure we keep the original value if no action is taken
+            if gro_approval == "Pending":
+                new_status = st.session_state.actions.get(i, gro_approval)
+            else:
+                new_status = gro_approval
+
+            updates.append({"name": name, "service_month": month, "gro_approval": new_status})
+
+        #st.write(updates)  # Debugging: Check the final updated values
+
+
+
+    #if st.button("Submit Actions"):
+    #    updates = []
+    #    for i, row in df.iterrows():
+    #        new_status = st.session_state.actions.get(i, "Approved")
+    #        new_amount = row["calculated_amount"] if new_status == "accept" else 0
+    #        updates.append({"gro_approval": new_status})
             #df.at[i, "calculated_amount"] = new_amount
         
         update_gro_approval(po_line, updates)
@@ -386,6 +425,5 @@ if "df" in st.session_state and "job_rates" in st.session_state:
     st.dataframe(pd.DataFrame(st.session_state.job_rates))
 
 if st.button("Clear Screen"):
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    st.rerun()
+    st.session_state.clear()  # Clears all session state variables
+    st.rerun()  # Forces the app to rerun and refresh the UI
